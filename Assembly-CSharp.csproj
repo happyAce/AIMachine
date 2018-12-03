@@ -70,6 +70,7 @@
     <Compile Include="Assets\CameraFollow.cs" />
     <Compile Include="Assets\CoreFrame\PanelBase.cs" />
     <Compile Include="Assets\CoreFrame\PanelMgr.cs" />
+    <Compile Include="Assets\EnemyAIState.cs" />
     <Compile Include="Assets\EnemyTank.cs" />
     <Compile Include="Assets\PanelCode\InfoPanel.cs" />
     <Compile Include="Assets\PanelCode\OptionPanel.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="Assets\PanelCode\WinPanel.cs" />
     <Compile Include="Assets\Path.cs" />
     <Compile Include="Assets\Root.cs" />
+    <Compile Include="Assets\Singleton.cs" />
     <Compile Include="Assets\State.cs" />
     <Compile Include="Assets\StateMachine.cs" />
     <Compile Include="Assets\Tank.cs" />
