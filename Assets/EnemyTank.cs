@@ -7,8 +7,18 @@ namespace xlj
     public class EnemyTank : BaseGameEntity
     {
         //所控制的坦克
-        public static Tank tank;
-
+        private static Tank tank;
+        public static Tank m_tank
+        {
+            get
+            {
+                return tank;
+            }
+            set
+            {
+                tank = value;
+            }
+        }
         private StateMathine<EnemyTank> m_pStateMachine;
 
         public StateMathine<EnemyTank> GetFSM()
@@ -18,81 +28,43 @@ namespace xlj
         public EnemyTank(int id) : base(id)
         {
             m_pStateMachine = new StateMathine<EnemyTank>(this);
-        }
-        public override void update()
-        {
-            base.update();
-
-        }
-
-        //巡逻开始
-        void PatrolStart()
-        {
-
-        }
-
-
-        //攻击开始
-        public void AttackStart()
-        {
-            Vector3 targetPos = target.transform.position;
-            path.InitByNavMeshPath(transform.position, targetPos);
-        }
-
-
-        //巡逻中
-        void PatrolUpdate()
-        {
-            //发现敌人
-            if (target != null)
-                ChangeStatus(Status.Attack);
-            //更新巡逻点
-            float interval = Time.time - lastUpdateWaypointTime;
-            if (interval < updateWaypointtInterval)
-                return;
-            lastUpdateWaypointTime = Time.time;
-
-            if (path.waypoints == null || path.isFinish)
-            {
-                GameObject obj = GameObject.Find("WaypointContainer");
-                {
-                    int count = obj.transform.childCount;
-                    if (count == 0) return;
-                    int index = Random.Range(0, count);
-                    Vector3 targetPos = obj.transform.GetChild(index).position;
-                    path.InitByNavMeshPath(transform.position, targetPos);
-                }
-            }
-        }
-
-        //攻击中
-        void AttackUpdate()
-        {
-            //目标丢失
-            if (target == null)
-                ChangeStatus(Status.Patrol);
-            //更新巡逻点
-            float interval = Time.time - lastUpdateWaypointTime;
-            if (interval < updateWaypointtInterval)
-                return;
-            lastUpdateWaypointTime = Time.time;
-
-            Vector3 targetPos = target.transform.position;
-            path.InitByNavMeshPath(transform.position, targetPos);
+            m_pStateMachine.SetCurrentState(Singleton<Patrol>.Instance);
         }
 
         void Start()
         {
+            if (path == null)
+                path = new Path();
+
+            m_pStateMachine = new StateMathine<EnemyTank>(this);
+            m_pStateMachine.SetCurrentState(Singleton<Patrol>.Instance);
+
+            sightDistance = 30;
+            lastSearchTargetTime = 0;
+            searchTargetInterval = 3;
+            lastUpdateWaypointTime = float.MinValue;
+            updateWaypointtInterval = 10;
+
             InitWaypoint();
+        }
+
+        public override void update()
+        {
+            if (tank.ctrlType != Tank.CtrlType.computer)
+                return;
+
+            TargetUpdate();
+            //行走
+            if (path.IsReach(transform))
+            {
+                path.NextWaypoint();
+            }
+            m_pStateMachine.update();
         }
 
         void OnDrawGizmos()
         {
             path.DrawWaypoints();
-        }
-        public GameObject Gettarget()
-        {
-            return target;
         }
         //----------------搜寻目标----------------------
         //锁定的坦克
@@ -104,6 +76,34 @@ namespace xlj
         //搜寻间隔
         private float searchTargetInterval = 3;
 
+        public static GameObject m_target
+        {
+            get
+            {
+                return target;
+            }
+        }
+        public float m_sightDistance
+        {
+            get
+            {
+                return sightDistance;
+            }
+        }
+        public float m_lastSearchTargetTime
+        {
+            get
+            {
+                return lastSearchTargetTime;
+            }
+        }
+        public float m_searchTargetInterval
+        {
+            get
+            {
+                return searchTargetInterval;
+            }
+        }
         //搜寻目标
         void TargetUpdate()
         {
@@ -231,7 +231,36 @@ namespace xlj
         //更新路径cd
         private float updateWaypointtInterval = 10;
 
+        public Path m_path
+        {
+            get
+            {
+                return path;
+            }
+            set
+            {
+                path = value;
+            }   
+        }
+        public float m_updateWaypointtInterval
+        {
+            get
+            {
+                return updateWaypointtInterval;
+            }
+        }
+        public float m_lastUpdateWaypointTime
+        {
+            get
+            {
+                return lastUpdateWaypointTime;
+            }
+            set
+            {
+                lastUpdateWaypointTime = value;
+            }
 
+        }
         //初始化路点
         void InitWaypoint()
         {

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+
 public class Tank : MonoBehaviour
 {
     //炮塔炮管轮子履带
@@ -83,8 +84,8 @@ public class Tank : MonoBehaviour
     public AudioClip shootClip;
 
     //人工智能
-    private AI ai;
-
+    //private AI ai;
+    private xlj.EnemyTank ET;
     //显示击杀图标
     public void StartDrawKill()
     {
@@ -124,16 +125,16 @@ public class Tank : MonoBehaviour
             return;
 
         //炮塔方位
-        Vector3 rot = ai.GetTurretTarget();
+        Vector3 rot = ET.GetTurretTarget();
         turretRotTarget = rot.y;
         turretRollTarget = rot.x;
         //发射炮弹
-        if (ai.IsShoot()) 
+        if (ET.IsShoot())
             Shoot();
         //移动
-        steering = ai.GetSteering();
-        motor = ai.GetMotor();
-        brakeTorque = ai.GetBrakeTorque();
+        steering = ET.GetSteering();
+        motor = ET.GetMotor();
+        brakeTorque = ET.GetBrakeTorque();
     }
 
     //无人控制
@@ -166,14 +167,16 @@ public class Tank : MonoBehaviour
         //人工智能
         if (ctrlType == CtrlType.computer)
         {
-            ai = gameObject.AddComponent<AI>();
-            ai.tank = this;
+            ET = gameObject.AddComponent<xlj.EnemyTank>();
+            xlj.EnemyTank.m_tank = this;
         }
     }
 
     //每帧执行一次
     void Update()
     {
+        if (ET != null)
+            ET.update();
         //操控
         PlayerCtrl();
         CombuterCtrl();
@@ -317,7 +320,7 @@ public class Tank : MonoBehaviour
         if (bullet == null)
             return;
         //发射
-        Vector3 pos = gun.position + gun.forward*5;
+        Vector3 pos = gun.position + gun.forward * 5;
         GameObject bulletObj = (GameObject)Instantiate(bullet, pos, gun.rotation);
         Bullet bulletCmp = bulletObj.GetComponent<Bullet>();
         if (bulletCmp != null)
@@ -346,16 +349,16 @@ public class Tank : MonoBehaviour
             destoryObj.transform.localPosition = Vector3.zero;
             ctrlType = CtrlType.none;
             //显示击杀提示
-            if(attackTank != null )
-			{
-				Tank tankCmp = attackTank.GetComponent<Tank>();
-				if(tankCmp != null && tankCmp.ctrlType == CtrlType.player) 
-					tankCmp.StartDrawKill();
-			}
-            //AI处理
-            if (ai != null)
+            if (attackTank != null)
             {
-                ai.OnAttecked(attackTank);
+                Tank tankCmp = attackTank.GetComponent<Tank>();
+                if (tankCmp != null && tankCmp.ctrlType == CtrlType.player)
+                    tankCmp.StartDrawKill();
+            }
+            //AI处理
+            if (ET != null)
+            {
+                ET.OnAttecked(attackTank);
             }
             //战场结算
             Battle.instance.IsWin(attackTank);
@@ -417,9 +420,9 @@ public class Tank : MonoBehaviour
         Vector3 screenPoint = Camera.main.WorldToScreenPoint(explodePoint);
         //绘制坦克准心
         Rect tankRect = new Rect(screenPoint.x - tankSight.width / 2,
-                             Screen.height - screenPoint.y - tankSight.height / 2,
-                             tankSight.width,
-                             tankSight.height);
+                                Screen.height - screenPoint.y - tankSight.height / 2,
+                                tankSight.width,
+                                tankSight.height);
         GUI.DrawTexture(tankRect, tankSight);
 
         //绘制中心准心
@@ -435,7 +438,7 @@ public class Tank : MonoBehaviour
     {
         //底框
         Rect bgRect = new Rect(30, Screen.height - hpBarBg.height - 15,
-                                 hpBarBg.width, hpBarBg.height);
+                                    hpBarBg.width, hpBarBg.height);
         GUI.DrawTexture(bgRect, hpBarBg);
         //指示条
         float width = hp * 102 / maxHp;
@@ -443,7 +446,7 @@ public class Tank : MonoBehaviour
         GUI.DrawTexture(hpRect, hpBar);
         //文字
         string text = Mathf.Ceil(hp).ToString() + "/" + Mathf.Ceil(maxHp).ToString();
-        Rect textRect = new Rect(bgRect.x + 80, bgRect.y -10, 50, 50);
+        Rect textRect = new Rect(bgRect.x + 80, bgRect.y - 10, 50, 50);
         GUI.Label(textRect, text);
     }
 
