@@ -7,8 +7,8 @@ namespace xlj
     public class EnemyTank : BaseGameEntity
     {
         //所控制的坦克
-        private static Tank tank;
-        public static Tank m_tank
+        private Tank tank;
+        public Tank m_tank
         {
             get
             {
@@ -25,27 +25,24 @@ namespace xlj
         {
             return m_pStateMachine;
         }
-        public EnemyTank(int id) : base(id)
-        {
-            m_pStateMachine = new StateMathine<EnemyTank>(this);
-            m_pStateMachine.SetCurrentState(Singleton<Patrol>.Instance);
-        }
-
+     
         void Start()
         {
             if (path == null)
                 path = new Path();
-
-            m_pStateMachine = new StateMathine<EnemyTank>(this);
-            m_pStateMachine.SetCurrentState(Singleton<Patrol>.Instance);
 
             sightDistance = 30;
             lastSearchTargetTime = 0;
             searchTargetInterval = 3;
             lastUpdateWaypointTime = float.MinValue;
             updateWaypointtInterval = 10;
-
             InitWaypoint();
+
+            m_pStateMachine = new StateMathine<EnemyTank>(this);
+
+            m_pStateMachine.SetCurrentState(Singleton<Patrol>.Instance);
+            
+           
         }
 
         public override void update()
@@ -68,7 +65,7 @@ namespace xlj
         }
         //----------------搜寻目标----------------------
         //锁定的坦克
-        private static GameObject target;
+        private GameObject target;
         //视野范围
         private float sightDistance = 30;
         //上一次搜寻时间
@@ -76,7 +73,7 @@ namespace xlj
         //搜寻间隔
         private float searchTargetInterval = 3;
 
-        public static GameObject m_target
+        public GameObject m_target
         {
             get
             {

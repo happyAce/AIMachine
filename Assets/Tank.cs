@@ -146,7 +146,7 @@ public class Tank : MonoBehaviour
         steering = 0;
         brakeTorque = maxBrakeTorque / 2;
     }
-
+    private int m_id = 1;
     //开始时执行
     void Start()
     {
@@ -167,8 +167,25 @@ public class Tank : MonoBehaviour
         //人工智能
         if (ctrlType == CtrlType.computer)
         {
+            GameObject[] targets = GameObject.FindGameObjectsWithTag("Tank");
+            string name = "enemycamp";
+            for (int i = 0; i < targets.Length; i++)
+            {
+                //Tank组件
+                Tank tank = targets[i].GetComponent<Tank>();
+                if (tank == null)
+                    continue;
+                if(targets[i].GetComponent<Tank>().ctrlType == CtrlType.player && Battle.instance.IsSameCamp(gameObject, targets[i]))
+                {
+                    name = "playercamp";
+                    break;
+                }
+            }
             ET = gameObject.AddComponent<xlj.EnemyTank>();
-            xlj.EnemyTank.m_tank = this;
+            ET.m_name = name;
+            ET.m_id = m_id;
+            ET.m_tank = this;
+            m_id += 1;
         }
     }
 

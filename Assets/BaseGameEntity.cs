@@ -4,21 +4,29 @@ using UnityEngine;
 
 public class BaseGameEntity : MonoBehaviour
 {
-
-    private int m_ID;
-    private static int m_iNextValidID = 0;
-    private void setID(int val)
+    private int id;
+    private string name;
+    public int m_id
     {
-        m_ID = val;
-        m_iNextValidID = m_ID + 1;
+        get
+        {
+            return id;
+        }
+        set
+        {
+            id = value;
+        }
     }
-    public BaseGameEntity(int id)
+    public string m_name
     {
-        setID(id);
-    }
-	public int ID()
-    {
-        return m_ID;
+        get
+        {
+            return name;
+        }
+        set
+        {
+            name = value;
+        }
     }
     public virtual void update()
     {
